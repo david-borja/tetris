@@ -126,7 +126,7 @@ const GameState = {
     holdPiece: null,
     canHold: true,
     score: 0,
-    level: 1,
+    level: 5,
     lines: 0,
     combo: 0,
     isPaused: false,
@@ -136,7 +136,8 @@ const GameState = {
     lastDropTime: 0,
     bag: [],
     lineClearAnimation: null,
-    animationStartTime: 0
+    animationStartTime: 0,
+    speedBonus: 0
 };
 
 // ============================================================================
@@ -209,7 +210,7 @@ function setupCanvases() {
 function resetGame() {
     GameState.board = createEmptyBoard();
     GameState.score = 0;
-    GameState.level = 1;
+    GameState.level = 5;
     GameState.lines = 0;
     GameState.combo = 0;
     GameState.isPaused = false;
@@ -218,6 +219,7 @@ function resetGame() {
     GameState.canHold = true;
     GameState.bag = [];
     GameState.lineClearAnimation = null;
+    GameState.speedBonus = 0;
 
     if (GameState.lockTimer) {
         clearTimeout(GameState.lockTimer);
@@ -511,6 +513,8 @@ function clearLines() {
 
     updateLevel();
 
+    GameState.speedBonus += linesToClear.length * 15;
+
     if (linesToClear.length === 4) {
         audioManager.playTetris();
     } else {
@@ -550,7 +554,8 @@ function updateLevel() {
 }
 
 function getGravityInterval() {
-    return GRAVITY_INTERVALS[Math.min(GameState.level - 1, GRAVITY_INTERVALS.length - 1)];
+    const baseInterval = GRAVITY_INTERVALS[Math.min(GameState.level - 1, GRAVITY_INTERVALS.length - 1)];
+    return Math.max(50, baseInterval - GameState.speedBonus);
 }
 
 function getSpeedMultiplier() {
@@ -590,8 +595,8 @@ function togglePause() {
     }
 }
 
-function toggleMusic() {
-    const isPlaying = audioManager.toggleMusic();
+async function toggleMusic() {
+    const isPlaying = await audioManager.toggleMusic();
     elements.musicToggle.classList.toggle('active', isPlaying);
     elements.musicToggle.querySelector('.music-status').textContent = isPlaying ? 'ON' : 'OFF';
 }
@@ -968,14 +973,14 @@ class AudioManager {
         }
     }
 
-    toggleMusic() {
+    async toggleMusic() {
         if (!this.isInitialized) this.init();
         this.resume();
 
         if (this.isMusicPlaying) {
             this.stopMusic();
         } else {
-            this.startMusic();
+            await this.startMusic();
         }
 
         return this.isMusicPlaying;
