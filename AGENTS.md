@@ -24,10 +24,9 @@
 ## Audio System (in `script.js`)
 
 The `AudioManager` class handles all music and sound effects using Web Audio API:
-- Music uses `audioContext.createOscillator()` for synthesized tones
-- Drums use noise buffers with filters
+- **Music**: MP3 file (`forever-bound_stereo-madness.mp3`) loaded via fetch, decoded, and played as a looping `AudioBufferSourceNode`
+- **Sound effects**: Procedural using `audioContext.createOscillator()` for square wave tones
 - Reverb is created via `createConvolver()` with a generated impulse response
-- Music is tempo-synced to game state via `setTimeout` scheduler
 
 ## Controls
 
