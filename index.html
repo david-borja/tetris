@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tetris</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="game-container">
+        <header class="game-header">
+            <h1>TETRIS</h1>
+            <button id="music-toggle" class="music-toggle" title="Toggle Music (M)">
+                <span class="music-icon">♫</span>
+                <span class="music-status">OFF</span>
+            </button>
+        </header>
+
+        <main class="game-main">
+            <aside class="side-panel side-panel--left">
+                <section class="panel hold-panel">
+                    <h2 class="panel-title">HOLD</h2>
+                    <canvas id="hold-canvas" class="preview-canvas"></canvas>
+                </section>
+
+                <section class="panel controls-panel">
+                    <h2 class="panel-title">CONTROLS</h2>
+                    <ul class="controls-list">
+                        <li><span class="key">←</span> <span class="action">Move Left</span></li>
+                        <li><span class="key">→</span> <span class="action">Move Right</span></li>
+                        <li><span class="key">↓</span> <span class="action">Soft Drop</span></li>
+                        <li><span class="key">↑</span> <span class="action">Rotate CW</span></li>
+                        <li><span class="key">Z</span> <span class="action">Rotate CCW</span></li>
+                        <li><span class="key">Space</span> <span class="action">Hard Drop</span></li>
+                        <li><span class="key">C</span> <span class="action">Hold</span></li>
+                        <li><span class="key">M</span> <span class="action">Music</span></li>
+                        <li><span class="key">P</span> <span class="action">Pause</span></li>
+                        <li><span class="key">R</span> <span class="action">Restart</span></li>
+                    </ul>
+                </section>
+            </aside>
+
+            <section class="game-board-section">
+                <canvas id="game-canvas" class="game-canvas"></canvas>
+                <div id="pause-overlay" class="overlay overlay--pause hidden">
+                    <div class="overlay-content">
+                        <h2>PAUSED</h2>
+                        <p>Press P to resume</p>
+                    </div>
+                </div>
+                <div id="gameover-overlay" class="overlay overlay--gameover hidden">
+                    <div class="overlay-content">
+                        <h2>GAME OVER</h2>
+                        <p>Final Score: <span id="final-score">0</span></p>
+                        <button id="restart-btn" class="btn">Play Again</button>
+                    </div>
+                </div>
+            </section>
+
+            <aside class="side-panel side-panel--right">
+                <section class="panel stats-panel">
+                    <div class="stat">
+                        <h3 class="stat-label">SCORE</h3>
+                        <p id="score" class="stat-value">0</p>
+                    </div>
+                    <div class="stat">
+                        <h3 class="stat-label">LEVEL</h3>
+                        <p id="level" class="stat-value">1</p>
+                    </div>
+                    <div class="stat">
+                        <h3 class="stat-label">LINES</h3>
+                        <p id="lines" class="stat-value">0</p>
+                    </div>
+                </section>
+
+                <section class="panel next-panel">
+                    <h2 class="panel-title">NEXT</h2>
+                    <canvas id="next-canvas" class="preview-canvas"></canvas>
+                </section>
+
+                <section class="panel speed-panel">
+                    <h2 class="panel-title">SPEED</h2>
+                    <p id="speed" class="stat-value">1.0x</p>
+                </section>
+            </aside>
+        </main>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

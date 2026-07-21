@@ -1,0 +1,321 @@
+:root {
+    --color-bg-primary: #0a0a0f;
+    --color-bg-secondary: #12121a;
+    --color-bg-panel: #1a1a25;
+    --color-border: #2a2a3a;
+    --color-text-primary: #ffffff;
+    --color-text-secondary: #8888aa;
+    --color-accent: #00ffff;
+    --color-accent-glow: rgba(0, 255, 255, 0.3);
+
+    --color-i: #00ffff;
+    --color-o: #ffff00;
+    --color-t: #aa00ff;
+    --color-s: #00ff00;
+    --color-z: #ff0000;
+    --color-j: #0000ff;
+    --color-l: #ff8800;
+
+    --font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    --font-mono: 'Courier New', monospace;
+
+    --panel-radius: 12px;
+    --panel-padding: 16px;
+    --gap-sm: 8px;
+    --gap-md: 16px;
+    --gap-lg: 24px;
+
+    --cell-size: 30px;
+    --preview-cell-size: 20px;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: var(--font-family);
+    background: var(--color-bg-primary);
+    color: var(--color-text-primary);
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+}
+
+.game-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--gap-lg);
+    padding: var(--gap-lg);
+}
+
+.game-header {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--gap-md);
+}
+
+.game-header h1 {
+    font-size: 3rem;
+    font-weight: 700;
+    letter-spacing: 0.5em;
+    text-align: center;
+    color: var(--color-accent);
+    text-shadow:
+        0 0 10px var(--color-accent),
+        0 0 20px var(--color-accent),
+        0 0 40px var(--color-accent-glow);
+}
+
+.music-toggle {
+    display: flex;
+    align-items: center;
+    gap: var(--gap-sm);
+    background: var(--color-bg-panel);
+    border: 1px solid var(--color-border);
+    color: var(--color-text-secondary);
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 500;
+    letter-spacing: 0.05em;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.music-toggle:hover {
+    border-color: var(--color-s);
+    color: var(--color-s);
+}
+
+.music-toggle.active {
+    background: linear-gradient(135deg, #2a4a3a 0%, #1a3a2a 100%);
+    color: var(--color-s);
+    border-color: var(--color-s);
+    box-shadow: 0 0 15px rgba(0, 255, 0, 0.15);
+}
+
+.music-toggle .music-icon {
+    font-size: 1rem;
+}
+
+.game-main {
+    display: flex;
+    gap: var(--gap-lg);
+    align-items: flex-start;
+}
+
+.side-panel {
+    display: flex;
+    flex-direction: column;
+    gap: var(--gap-md);
+    min-width: 150px;
+}
+
+.panel {
+    background: var(--color-bg-panel);
+    border: 1px solid var(--color-border);
+    border-radius: var(--panel-radius);
+    padding: var(--panel-padding);
+}
+
+.panel-title {
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.2em;
+    color: var(--color-text-secondary);
+    margin-bottom: var(--gap-sm);
+    text-align: center;
+}
+
+.preview-canvas {
+    display: block;
+    margin: 0 auto;
+    background: var(--color-bg-secondary);
+    border-radius: 8px;
+}
+
+.game-board-section {
+    position: relative;
+}
+
+.game-canvas {
+    display: block;
+    background: var(--color-bg-secondary);
+    border: 2px solid var(--color-border);
+    border-radius: 4px;
+    box-shadow:
+        0 0 20px rgba(0, 0, 0, 0.5),
+        inset 0 0 60px rgba(0, 0, 0, 0.3);
+}
+
+.overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: rgba(0, 0, 0, 0.85);
+    border-radius: 4px;
+    animation: fadeIn 0.3s ease;
+}
+
+.overlay.hidden {
+    display: none;
+}
+
+.overlay-content {
+    text-align: center;
+}
+
+.overlay-content h2 {
+    font-size: 2rem;
+    font-weight: 700;
+    letter-spacing: 0.3em;
+    margin-bottom: var(--gap-md);
+}
+
+.overlay--pause h2 {
+    color: var(--color-accent);
+}
+
+.overlay--gameover h2 {
+    color: var(--color-z);
+}
+
+.overlay-content p {
+    color: var(--color-text-secondary);
+    margin-bottom: var(--gap-md);
+}
+
+.overlay-content .btn {
+    background: var(--color-accent);
+    color: var(--color-bg-primary);
+    border: none;
+    padding: 12px 32px;
+    font-size: 1rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.overlay-content .btn:hover {
+    transform: scale(1.05);
+    box-shadow: 0 0 20px var(--color-accent-glow);
+}
+
+.stat {
+    text-align: center;
+    padding: var(--gap-sm) 0;
+}
+
+.stat:not(:last-child) {
+    border-bottom: 1px solid var(--color-border);
+}
+
+.stat-label {
+    font-size: 0.65rem;
+    font-weight: 600;
+    letter-spacing: 0.15em;
+    color: var(--color-text-secondary);
+    margin-bottom: 4px;
+}
+
+.stat-value {
+    font-family: var(--font-mono);
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--color-accent);
+}
+
+.controls-list {
+    list-style: none;
+    font-size: 0.7rem;
+}
+
+.controls-list li {
+    display: flex;
+    justify-content: space-between;
+    gap: var(--gap-sm);
+    padding: 4px 0;
+    color: var(--color-text-secondary);
+}
+
+.controls-list .key {
+    font-family: var(--font-mono);
+    font-weight: 600;
+    color: var(--color-text-primary);
+    min-width: 50px;
+}
+
+.speed-panel .stat-value {
+    font-size: 1.2rem;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@media (max-width: 768px) {
+    :root {
+        --cell-size: 20px;
+        --preview-cell-size: 14px;
+    }
+
+    .game-main {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .side-panel {
+        flex-direction: row;
+        flex-wrap: wrap;
+        justify-content: center;
+        min-width: auto;
+    }
+
+    .side-panel--left {
+        order: 2;
+    }
+
+    .side-panel--right {
+        order: 1;
+    }
+
+    .game-board-section {
+        order: 0;
+    }
+
+    .controls-panel {
+        display: none;
+    }
+}
+
+@media (max-width: 480px) {
+    :root {
+        --cell-size: 16px;
+        --preview-cell-size: 12px;
+    }
+
+    .game-header h1 {
+        font-size: 2rem;
+        letter-spacing: 0.3em;
+    }
+
+    .music-toggle {
+        padding: 6px 12px;
+        font-size: 0.65rem;
+    }
+}
