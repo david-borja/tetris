@@ -940,19 +940,14 @@ setInterval(() => {
 }, 16);
 
 // ============================================================================
-// AUDIO MANAGER - MP3 Music & Procedural Sound Effects
+// AUDIO MANAGER - MP3 Music & Sound Effects
 // ============================================================================
 
 class AudioManager {
     constructor() {
         this.audioContext = null;
-        this.masterGain = null;
-        this.musicGain = null;
-        this.sfxGain = null;
         this.isMusicPlaying = false;
         this.isInitialized = false;
-        this.reverbNode = null;
-        this.musicAudio = null;
         this.musicSource = null;
     }
 
@@ -961,42 +956,10 @@ class AudioManager {
 
         try {
             this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
-
-            this.masterGain = this.audioContext.createGain();
-            this.masterGain.gain.value = 0.5;
-            this.masterGain.connect(this.audioContext.destination);
-
-            this.musicGain = this.audioContext.createGain();
-            this.musicGain.gain.value = 0.7;
-            this.musicGain.connect(this.masterGain);
-
-            this.sfxGain = this.audioContext.createGain();
-            this.sfxGain.gain.value = 0.4;
-            this.sfxGain.connect(this.masterGain);
-
-            this.reverbNode = this.createReverb();
-
             this.isInitialized = true;
         } catch (e) {
             console.warn('Web Audio API not supported');
         }
-    }
-
-    createReverb() {
-        const convolver = this.audioContext.createConvolver();
-        const rate = this.audioContext.sampleRate;
-        const length = rate * 1.5;
-        const impulse = this.audioContext.createBuffer(2, length, rate);
-
-        for (let channel = 0; channel < 2; channel++) {
-            const data = impulse.getChannelData(channel);
-            for (let i = 0; i < length; i++) {
-                data[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / length, 2);
-            }
-        }
-
-        convolver.buffer = impulse;
-        return convolver;
     }
 
     resume() {
@@ -1035,7 +998,7 @@ class AudioManager {
             this.musicSource = this.audioContext.createBufferSource();
             this.musicSource.buffer = audioBuffer;
             this.musicSource.loop = true;
-            this.musicSource.connect(this.musicGain);
+            this.musicSource.connect(this.audioContext.destination);
 
             this.musicSource.start(0);
             this.isMusicPlaying = true;
@@ -1047,23 +1010,9 @@ class AudioManager {
     stopMusic() {
         if (this.musicSource) {
             this.musicSource.stop();
-            this.musicSource.disconnect();
             this.musicSource = null;
         }
         this.isMusicPlaying = false;
-    }
-
-    noteToFreq(note) {
-        const notes = {
-            'C3': 130.81, 'D3': 146.83, 'E3': 164.81, 'F3': 174.61,
-            'G3': 196.00, 'A3': 220.00, 'B3': 246.94,
-            'C4': 261.63, 'D4': 293.66, 'E4': 329.63, 'F4': 349.23,
-            'G4': 392.00, 'A4': 440.00, 'B4': 493.88,
-            'C5': 523.25, 'D5': 587.33, 'E5': 659.25, 'F5': 698.46,
-            'G5': 783.99, 'A5': 880.00, 'B5': 987.77,
-            'C6': 1046.50, 'D6': 1174.66
-        };
-        return notes[note] || 440;
     }
 
     playLineClear(lines) {
@@ -1071,31 +1020,23 @@ class AudioManager {
         this.resume();
 
         const baseNotes = [659.25, 783.99, 1046.50, 1318.51];
-        const duration = 0.3;
 
         for (let i = 0; i < lines; i++) {
             setTimeout(() => {
-                const freq = baseNotes[i] || baseNotes[3];
-
                 const osc = this.audioContext.createOscillator();
                 const gain = this.audioContext.createGain();
-                const filter = this.audioContext.createBiquadFilter();
 
                 osc.type = 'square';
-                osc.frequency.value = freq;
+                osc.frequency.value = baseNotes[i] || baseNotes[3];
 
-                filter.type = 'lowpass';
-                filter.frequency.value = 3000;
+                gain.gain.setValueAtTime(0.1, this.audioContext.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, this.audioContext.currentTime + 0.2);
 
-                gain.gain.setValueAtTime(0.15, this.audioContext.currentTime);
-                gain.gain.exponentialRampToValueAtTime(0.001, this.audioContext.currentTime + duration);
-
-                osc.connect(filter);
-                filter.connect(gain);
-                gain.connect(this.sfxGain);
+                osc.connect(gain);
+                gain.connect(this.audioContext.destination);
 
                 osc.start();
-                osc.stop(this.audioContext.currentTime + duration);
+                osc.stop(this.audioContext.currentTime + 0.25);
             }, i * 100);
         }
     }
@@ -1111,11 +1052,11 @@ class AudioManager {
         osc.frequency.setValueAtTime(200, this.audioContext.currentTime);
         osc.frequency.exponentialRampToValueAtTime(50, this.audioContext.currentTime + 0.1);
 
-        gain.gain.setValueAtTime(0.15, this.audioContext.currentTime);
+        gain.gain.setValueAtTime(0.1, this.audioContext.currentTime);
         gain.gain.exponentialRampToValueAtTime(0.001, this.audioContext.currentTime + 0.1);
 
         osc.connect(gain);
-        gain.connect(this.sfxGain);
+        gain.connect(this.audioContext.destination);
 
         osc.start();
         osc.stop(this.audioContext.currentTime + 0.15);
@@ -1135,7 +1076,7 @@ class AudioManager {
         gain.gain.exponentialRampToValueAtTime(0.001, this.audioContext.currentTime + 0.04);
 
         osc.connect(gain);
-        gain.connect(this.sfxGain);
+        gain.connect(this.audioContext.destination);
 
         osc.start();
         osc.stop(this.audioContext.currentTime + 0.05);
@@ -1156,7 +1097,7 @@ class AudioManager {
         gain.gain.exponentialRampToValueAtTime(0.001, this.audioContext.currentTime + 0.06);
 
         osc.connect(gain);
-        gain.connect(this.sfxGain);
+        gain.connect(this.audioContext.destination);
 
         osc.start();
         osc.stop(this.audioContext.currentTime + 0.08);
@@ -1172,11 +1113,11 @@ class AudioManager {
         osc.type = 'square';
         osc.frequency.value = 150;
 
-        gain.gain.setValueAtTime(0.1, this.audioContext.currentTime);
+        gain.gain.setValueAtTime(0.08, this.audioContext.currentTime);
         gain.gain.exponentialRampToValueAtTime(0.001, this.audioContext.currentTime + 0.08);
 
         osc.connect(gain);
-        gain.connect(this.sfxGain);
+        gain.connect(this.audioContext.destination);
 
         osc.start();
         osc.stop(this.audioContext.currentTime + 0.1);
@@ -1187,7 +1128,6 @@ class AudioManager {
         this.resume();
 
         const notes = [523.25, 659.25, 783.99, 1046.50, 1318.51, 1567.98];
-        const duration = 0.15;
 
         notes.forEach((freq, i) => {
             setTimeout(() => {
@@ -1197,15 +1137,15 @@ class AudioManager {
                 osc.type = 'square';
                 osc.frequency.value = freq;
 
-                gain.gain.setValueAtTime(0.15, this.audioContext.currentTime);
-                gain.gain.exponentialRampToValueAtTime(0.001, this.audioContext.currentTime + duration * 0.8);
+                gain.gain.setValueAtTime(0.1, this.audioContext.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, this.audioContext.currentTime + 0.15);
 
                 osc.connect(gain);
-                gain.connect(this.sfxGain);
+                gain.connect(this.audioContext.destination);
 
                 osc.start();
-                osc.stop(this.audioContext.currentTime + duration);
-            }, i * duration * 1000);
+                osc.stop(this.audioContext.currentTime + 0.2);
+            }, i * 100);
         });
     }
 
@@ -1214,7 +1154,6 @@ class AudioManager {
         this.resume();
 
         const notes = [392, 349.23, 329.63, 261.63, 220, 174.61, 146.83, 130.81];
-        const duration = 0.2;
 
         notes.forEach((freq, i) => {
             setTimeout(() => {
@@ -1223,17 +1162,16 @@ class AudioManager {
 
                 osc.type = 'square';
                 osc.frequency.value = freq;
-                osc.frequency.exponentialRampToValueAtTime(freq * 0.8, this.audioContext.currentTime + duration * 0.9);
 
-                gain.gain.setValueAtTime(0.12, this.audioContext.currentTime);
-                gain.gain.exponentialRampToValueAtTime(0.001, this.audioContext.currentTime + duration * 0.85);
+                gain.gain.setValueAtTime(0.1, this.audioContext.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, this.audioContext.currentTime + 0.15);
 
                 osc.connect(gain);
-                gain.connect(this.sfxGain);
+                gain.connect(this.audioContext.destination);
 
                 osc.start();
-                osc.stop(this.audioContext.currentTime + duration);
-            }, i * duration * 1000);
+                osc.stop(this.audioContext.currentTime + 0.2);
+            }, i * 150);
         });
     }
 }
