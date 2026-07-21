@@ -554,8 +554,9 @@ function updateLevel() {
 }
 
 function getGravityInterval() {
-    const baseInterval = GRAVITY_INTERVALS[Math.min(GameState.level - 1, GRAVITY_INTERVALS.length - 1)];
-    return Math.max(50, baseInterval - GameState.speedBonus);
+    const startLevel = 5;
+    const startInterval = GRAVITY_INTERVALS[startLevel - 1];
+    return Math.max(50, startInterval - GameState.speedBonus);
 }
 
 function getSpeedMultiplier() {
@@ -978,7 +979,7 @@ class AudioManager {
         this.resume();
 
         if (this.isMusicPlaying) {
-            this.stopMusic();
+            await this.stopMusic();
         } else {
             await this.startMusic();
         }
@@ -991,6 +992,7 @@ class AudioManager {
         this.resume();
 
         if (this.musicSource) {
+            this.musicSource.onended = null;
             this.musicSource.stop();
             this.musicSource.disconnect();
         }
@@ -1012,9 +1014,11 @@ class AudioManager {
         }
     }
 
-    stopMusic() {
+    async stopMusic() {
         if (this.musicSource) {
+            this.musicSource.onended = null;
             this.musicSource.stop();
+            this.musicSource.disconnect();
             this.musicSource = null;
         }
         this.isMusicPlaying = false;
